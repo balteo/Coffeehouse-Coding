@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Coffeehouse Coding by balteo</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/main.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+
+      <header>
+        <h1>Coffeehouse Coding</h1>
+        <p>Relying efficiently upon the Spring test context cache in order to speed up you Spring integration tests</p>
+      </header>
+
+      <div id="banner">
+        <span id="logo"></span>
+
+        <a href="https://github.com/balteo/Coffeehouse-Coding" class="button fork"><strong>View On GitHub</strong></a>
+        <div class="downloads">
+          <span>Downloads:</span>
+          <ul>
+            <li><a href="https://github.com/balteo/Coffeehouse-Coding/zipball/master" class="button">ZIP</a></li>
+            <li><a href="https://github.com/balteo/Coffeehouse-Coding/tarball/master" class="button">TAR</a></li>
+          </ul>
+        </div>
+      </div><!-- end banner -->
+
+    <div class="wrapper">
+      <nav>
+        <ul></ul>
+      </nav>
+      <section>
+        <p>Using the <code>SpringJUnit4ClassRunner</code> in your integration tests will automatically create a test context cache that will cache Spring application context instances for you (see<code>org.springframework.test.context.ContextCache</code>).</p>
+
+<p>The number of instances in the test context cache will be mainly determined by the number of distinct context configurations used by your integration tests.</p>
+
+<p>Say you have the three following test cases:</p>
+
+<pre><code>@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = { ConfigA.class , ConfigB.class })
+public class FirstTestCase {
+...
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = { ConfigB.class})
+public class SecondTestCase {
+...
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = { ConfigA.class , ConfigB.class })
+public class ThirdTestCase {
+...
+</code></pre>
+
+<p>The context configuration for <em><strong>FirstTestCase</strong></em> will be cached and reused by <strong><em>ThirdTestCase</em></strong> because the context configuration are the same. The test context cache will therefore contain <strong>2 entries</strong> corresponding to the following context configurations:</p>
+
+<p>This will be used by <em><strong>FirstTestCase</strong></em> and <em><strong>ThirdTestCase</strong></em>:</p>
+
+<pre><code>@ContextConfiguration(classes = { ConfigA.class , ConfigB.class }) 
+</code></pre>
+
+<p>This will be used by <em><strong>SecondTestCase</strong></em> only:</p>
+
+<pre><code>@ContextConfiguration(classes = { ConfigB.class}) 
+</code></pre>
+
+<p>Working out manually how many entries the test context cache contains for your application tests can be quite challenging but the upcoming versions of Spring (4.1.2, 4.0.8, and 3.2.12) will have a neat feature that allowing you to gain insight into your test context cache usage.</p>
+
+<p>In order to use this feature, you just need to enable the debug log level for the following package: “<strong>org.springframework.test.context.cache</strong>” and Spring will start logging information such as:</p>
+
+<pre><code>2014-11-10 09:48:16.674 DEBUG 1740 --- [    Test worker] org.springframework.test.context.cache   : Spring test ApplicationContext cache statistics: [ContextCache@2067b93c size = 2, hitCount = 142, missCount = 2, parentContextCount = 0]
+2014-11-10 09:48:16.674 DEBUG 1740 --- [    Test worker] org.springframework.test.context.cache   : Spring test ApplicationContext cache statistics: [ContextCache@2067b93c size = 2, hitCount = 143, missCount = 2, parentContextCount = 0]
+2014-11-10 09:48:16.696 DEBUG 1740 --- [    Test worker] org.springframework.test.context.cache   : Spring test ApplicationContext cache statistics: [ContextCache@2067b93c size = 2, hitCount = 144, missCount = 2, parentContextCount = 0]
+</code></pre>
+
+<p>This is actually log output taken from an application I am currently working on. You can see that the size of my test context cache is <strong>2</strong> and that the cache is actually reusing those two instances and incrementing the hit count: <strong>142</strong>, <strong>143</strong>, <strong>144</strong>.</p>
+
+<p><strong>Conclusion</strong>: being aware of the existence of the Spring test context cache and understanding how the number of distinct Spring context configurations determine how many entries the cache eventually contains can help you organize more efficiently the structure of your spring integration tests and make them run much faster.</p>
+      </section>
+      <footer>
+        <p>Project maintained by <a href="https://github.com/balteo">balteo</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
